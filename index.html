@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KKA Quest: Koding dan AI Beraksi</title>
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#050f1a;overflow:hidden;font-family:Verdana,Trebuchet MS,sans-serif;color:#f1f7fb}
+#stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;background:radial-gradient(circle at 80% 10%,#16476b 0,transparent 45%),linear-gradient(160deg,#0a1f33,#071524);overflow:hidden}
+#stage:before{content:"";position:absolute;inset:0;background:linear-gradient(#ffffff08 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,#ffffff08 1px,transparent 1px) 0 0/40px 40px;pointer-events:none}
+.scr{position:absolute;inset:0;display:none;padding:34px 52px;flex-direction:column}
+.scr.on{display:flex}
+h1{font-size:68px;line-height:1.05;letter-spacing:-1px}
+h2{font-size:34px;margin-bottom:10px}
+p{font-size:22px;line-height:1.45}
+button{font-family:inherit;cursor:pointer;color:#fff}
+button:focus-visible{outline:4px solid #fbbf24;outline-offset:2px}
+.go{background:#fbbf24;color:#1a1200;border:0;border-radius:16px;font-size:26px;font-weight:bold;padding:14px 34px;min-height:58px;box-shadow:0 5px 0 #b17d00}
+.go:active{transform:translateY(3px);box-shadow:0 2px 0 #b17d00}
+.go:disabled{background:#51606b;color:#cbd5db;box-shadow:none;cursor:not-allowed}
+.sm{background:#12334f;border:2px solid #2f6a96;border-radius:12px;font-size:20px;padding:8px 18px;min-height:48px}
+.row{display:flex;gap:18px;align-items:center}
+.mint{color:#5eead4}.gold{color:#fbbf24}
+.chip{background:#12334f;border:2px solid #2f6a96;border-radius:14px;padding:6px 16px;font-size:19px}
+#home{flex-direction:row;align-items:center;gap:30px}
+#home .l{flex:1.2}#home .r{flex:.8;display:flex;justify-content:center}
+.tag{font-size:24px;color:#5eead4;margin:14px 0 6px}
+.desc{max-width:640px;color:#d3e3ee}
+.pm{background:#12334f;border-left:6px solid #fbbf24;padding:12px 18px;border-radius:10px;margin:18px 0 22px;max-width:640px;font-size:22px}
+.gd{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:14px 0}
+.cd{background:#12334f;border:2px solid #2f6a96;border-radius:18px;padding:18px 22px}
+.cd b{font-size:24px;color:#5eead4;display:block;margin-bottom:6px}
+.cd p{font-size:20px}
+#mp{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:12px 0;flex:1}
+.node{border-radius:20px;border:3px solid #2f6a96;background:#12334f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;font-size:19px}
+.node .num{font-size:38px;font-weight:bold}.node .st{color:#fbbf24;font-size:22px;min-height:28px}
+.node.z1{border-color:#5eead4}.node.z2{border-color:#a78bfa}.node.z3{border-color:#fb7185}
+.node.dn{background:#14534a}.node.lk{opacity:.55;cursor:not-allowed}
+#hud{display:flex;align-items:center;gap:20px;font-size:22px}
+#hud .zn{color:#5eead4;flex:1}
+#pb{height:10px;background:#12334f;border-radius:6px;margin:10px 0 14px;overflow:hidden}
+#pbi{height:100%;background:linear-gradient(90deg,#5eead4,#fbbf24);width:0;transition:width .4s}
+#body{background:#0f2b44;border:2px solid #2f6a96;border-radius:22px;padding:22px 30px;flex:1;overflow:auto}
+.q{font-size:25px;margin-bottom:12px}
+pre{background:#050f1a;border:2px solid #2f6a96;border-radius:12px;padding:12px 18px;font:22px/1.4 Consolas,monospace;color:#a7f3d0;margin-bottom:14px;width:max-content;max-width:100%}
+.opt{background:#1b4466;border:3px solid #3a79a8;border-radius:14px;font-size:22px;padding:12px 20px;min-height:58px;text-align:left;width:100%}
+.opt.ok{background:#14663a;border-color:#4ade80}.opt.bad{background:#7f1d2d;border-color:#fb7185}
+.opt.sel{border-color:#fbbf24;background:#3a4a1b}.opt:disabled{cursor:not-allowed;opacity:.85}
+#area .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ord,.mt{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.mt>div,.pool{display:flex;flex-direction:column;gap:10px}
+.lab{font-size:19px;color:#9fc2da;margin-bottom:8px}
+.slots{list-style:decimal inside;display:flex;flex-direction:column;gap:8px;font-size:21px}
+.slots li{background:#071524;border:2px dashed #3a79a8;border-radius:12px;padding:9px 14px;min-height:46px}
+.slots li.f{border-style:solid;background:#1b4466;cursor:pointer}.slots li.ok{background:#14663a;border-color:#4ade80}
+.card2{background:#1b4466;border:3px solid #fbbf24;border-radius:18px;padding:26px;font-size:28px;text-align:center;margin:8px 0 18px;min-height:110px;display:flex;align-items:center;justify-content:center}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:18px}.bin{text-align:center;font-size:26px;font-weight:bold}
+#fbr{display:flex;gap:16px;align-items:center;margin-top:12px;min-height:84px}
+#fb{flex:1;font-size:21px;line-height:1.35;padding:10px 18px;border-radius:14px;min-height:70px}
+#fb.ok{background:#0f4a30;border:2px solid #4ade80}#fb.bad{background:#5a1624;border:2px solid #fb7185}
+#ov{display:none;position:absolute;inset:0;background:#050f1aee;z-index:9;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:60px}
+table{border-collapse:collapse;font-size:19px;width:100%}td{padding:5px 12px;border-bottom:1px solid #2f6a96}
+textarea{width:100%;height:70px;background:#071524;color:#fff;border:2px solid #3a79a8;border-radius:12px;font:20px Verdana;padding:10px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div id="stage">
+
+<section class="scr on" id="home">
+ <div class="l">
+  <div class="chip" style="display:inline-block">Gim Edukasi · Koding dan Kecerdasan Artifisial</div>
+  <h1 style="margin-top:14px">KKA Quest:<br><span class="mint">Koding dan AI Beraksi</span></h1>
+  <div class="pm">Bisakah kamu menaklukkan 12 level dan jadi Teknisi Digital terbaik?</div>
+  <p class="desc">Halo, teman-teman! Di petualangan ini kamu menyusun algoritma, membaca kode, mengenal cara kerja AI, dan belajar memakainya dengan bijak. Kumpulkan bintang di setiap level, jaga nyawamu, dan buktikan kemampuanmu di dunia kerja digital.</p>
+  <div class="row" style="margin-top:24px"><button class="go" onclick="go('guide')">Mulai Misi</button><button class="sm" onclick="go('map')">Peta Level</button><button class="sm" onclick="go('credit')">Info</button><button class="sm" id="mu" onclick="mute=!mute;this.textContent=mute?'🔇 Suara mati':'🔊 Suara nyala'">🔊 Suara nyala</button></div>
+ </div>
+ <div class="r"><svg width="400" height="460" viewBox="0 0 400 460" role="img" aria-label="Ilustrasi robot AI dibuat dengan kode">
+  <rect x="190" y="20" width="20" height="50" fill="#5eead4"/><circle cx="200" cy="20" r="16" fill="#fbbf24"/>
+  <rect x="80" y="70" width="240" height="190" rx="40" fill="#1b4466" stroke="#5eead4" stroke-width="8"/>
+  <circle cx="150" cy="150" r="30" fill="#050f1a"/><circle cx="250" cy="150" r="30" fill="#050f1a"/><circle cx="150" cy="150" r="14" fill="#5eead4"/><circle cx="250" cy="150" r="14" fill="#5eead4"/>
+  <rect x="150" y="205" width="100" height="14" rx="7" fill="#fbbf24"/>
+  <rect x="110" y="280" width="180" height="140" rx="26" fill="#12334f" stroke="#2f6a96" stroke-width="6"/>
+  <text x="200" y="365" text-anchor="middle" font-family="Consolas,monospace" font-size="42" fill="#a7f3d0">{ AI }</text>
+  <rect x="40" y="290" width="50" height="100" rx="22" fill="#1b4466"/><rect x="310" y="290" width="50" height="100" rx="22" fill="#1b4466"/>
+ </svg></div>
+</section>
+
+<section class="scr" id="guide">
+ <h2>Panduan Bermain</h2><p>Selesaikan tantangan di setiap level. Kamu boleh memilih level mana pun yang sudah terbuka.</p>
+ <div class="gd">
+  <div class="cd"><b>Jenis tantangan</b><p>Pilih jawaban, urutkan langkah, cocokkan pasangan, dan kelompokkan kartu. Cukup klik atau ketuk.</p></div>
+  <div class="cd"><b>Nyawa: ❤️❤️❤️</b><p>Jawaban salah mengurangi 1 nyawa. Jika nyawa habis, kamu mengulang level itu dengan petunjuk.</p></div>
+  <div class="cd"><b>Poin dan bintang</b><p>Setiap level bernilai maksimal 100 poin. Makin sedikit salah, makin banyak bintang (★ sampai ★★★).</p></div>
+  <div class="cd"><b>Umpan balik</b><p>Setelah menjawab, kamu langsung melihat hasil beserta penjelasannya. Baca baik-baik, ya!</p></div>
+ </div>
+ <div class="row" style="margin-top:auto"><button class="sm" onclick="go('home')">◀ Kembali</button><span style="flex:1"></span><button class="go" onclick="go('map')">Berikutnya ▶</button></div>
+</section>
+
+<section class="scr" id="map">
+ <div class="row"><h2 style="flex:1">Peta Level</h2><span class="chip" id="ms"></span></div>
+ <p style="font-size:19px;color:#9fc2da">Hijau muda: Zona 1 Logika Koding · Ungu: Zona 2 Dunia AI · Merah muda: Zona 3 Etika dan Tantangan</p>
+ <div id="mp"></div>
+ <div class="row"><button class="sm" onclick="go('home')">◀ Laman Muka</button><button class="sm" onclick="go('guide')">Panduan</button><span style="flex:1"></span><button class="go" id="ev" onclick="result()">Evaluasi Akhir ▶</button></div>
+</section>
+
+<section class="scr" id="play">
+ <div id="hud"></div><div id="pb"><div id="pbi"></div></div>
+ <div id="body"></div>
+ <div id="fbr"><div id="fb" aria-live="polite"></div><button class="go" id="nx" style="display:none" onclick="cur==L.length-1?result():play(cur+1)"></button></div>
+ <div id="ov"><h1 style="font-size:54px">Nyawa habis 💔</h1><p id="ovt" style="max-width:800px"></p><div class="row"><button class="go" onclick="play(cur)">Ulangi Level</button><button class="sm" onclick="go('map')">Peta Level</button></div></div>
+</section>
+
+<section class="scr" id="result"></section>
+
+<section class="scr" id="credit">
+ <h2>Informasi Kreator</h2>
+ <div class="cd" style="margin:14px 0"><b>Kreator</b><p>[Isi nama kreator, boleh beserta gelar] — [Isi nama institusi]</p></div>
+ <div class="cd" style="margin-bottom:14px"><b>Sumber aset</b><p>Seluruh ilustrasi dibuat dengan kode SVG dan CSS oleh AI (Claude). Tidak ada aset atau tautan eksternal. Bunyi efek dihasilkan langsung oleh peramban.</p></div>
+ <div class="cd"><b>Kurikulum</b><p>Mata pelajaran Koding dan Kecerdasan Artifisial: berpikir komputasional, dasar pemrograman, konsep AI, dan etika penggunaan AI.</p></div>
+ <div class="row" style="margin-top:auto"><button class="sm" onclick="go('home')">◀ Laman Muka</button></div>
+</section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const L=[
+{k:'choice',n:'Apa itu algoritma?',q:'Algoritma adalah ...',o:['Urutan langkah logis untuk menyelesaikan masalah','Nama bahasa pemrograman','Perangkat keras komputer','Aplikasi pengedit foto'],a:0,e:'Algoritma adalah langkah-langkah yang runtut dan jelas untuk menyelesaikan masalah. Resep masakan pun termasuk algoritma.'},
+{k:'order',n:'Algoritma login',q:'Susun algoritma <b>masuk ke aplikasi</b> dengan urutan yang benar!',i:['Buka halaman login','Isi nama pengguna dan kata sandi','Tekan tombol Masuk','Sistem memeriksa data','Beranda aplikasi tampil'],e:'Urutan yang tepat membuat program berjalan sesuai harapan. Sistem baru memeriksa data setelah tombol Masuk ditekan.'},
+{k:'match',n:'Istilah koding',q:'Cocokkan istilah dengan artinya. Pilih kiri dulu, lalu pasangannya di kanan.',p:[['Variabel','Wadah penyimpan data'],['Percabangan','Memilih aksi sesuai kondisi'],['Perulangan','Mengulang perintah'],['Fungsi','Blok perintah yang dapat dipanggil ulang']],e:'Empat konsep ini adalah fondasi hampir semua program, dari aplikasi kasir sampai kontrol mesin.'},
+{k:'choice',n:'Membaca percabangan',q:'Apa yang tercetak oleh program kontrol kipas ini?',c:'suhu = 35\nif suhu &gt; 30:\n    print("Nyalakan kipas")\nelse:\n    print("Kipas mati")',o:['Nyalakan kipas','Kipas mati','Error','Tidak ada yang tercetak'],a:0,e:'Karena 35 lebih besar dari 30, kondisi benar sehingga bagian if yang dijalankan.'},
+{k:'choice',n:'Membaca perulangan',q:'Berapa kali kata Halo tercetak?',c:'for i in range(3):\n    print("Halo")',o:['1 kali','3 kali','4 kali','0 kali'],a:1,e:'range(3) menghasilkan 0, 1, 2 sehingga perintah di dalam for dijalankan 3 kali.'},
+{k:'cls',n:'Pakai AI atau bukan?',q:'Kelompokkan setiap kartu: apakah teknologinya memakai AI?',b:['Pakai AI','Bukan AI'],i:[['Asisten suara menjawab pertanyaanmu',0],['Kalkulator menjumlahkan angka',1],['Aplikasi video merekomendasikan tontonan',0],['Saklar lampu manual',1],['Kamera mengenali wajah untuk absensi',0],['Jam dinding',1]],e:'AI belajar dari data untuk mengenali pola atau membuat prediksi. Alat dengan aturan tetap seperti kalkulator bukan AI.'},
+{k:'order',n:'Tahap machine learning',q:'Susun tahapan <b>membuat model AI</b> dari awal sampai dipakai!',i:['Kumpulkan data','Bersihkan dan beri label data','Latih model','Uji akurasi model','Gunakan model di aplikasi'],e:'Kualitas data menentukan kualitas model, jadi data dikumpulkan dan dibersihkan sebelum pelatihan.'},
+{k:'match',n:'Istilah AI',q:'Cocokkan istilah AI dengan artinya.',p:[['Data latih','Contoh yang dipelajari model'],['Model','Hasil pelatihan untuk membuat prediksi'],['Akurasi','Seberapa sering prediksi benar'],['Prompt','Perintah yang kita berikan ke AI']],e:'Memahami istilah ini membantumu membaca laporan dan dokumentasi alat AI di tempat kerja.'},
+{k:'choice',n:'Waspada bias data',q:'Sistem absensi wajah hanya dilatih dengan foto dari sedikit kelompok siswa. Apa masalahnya?',o:['Tidak ada masalah, AI selalu adil','Bias data: akurasi buruk bagi wajah yang kurang terwakili','Kamera menjadi rusak','Kata sandi mudah ditebak'],a:1,e:'Data latih yang kurang beragam menimbulkan bias. Data harus mewakili semua kelompok pengguna.'},
+{k:'cls',n:'Etika memakai AI',q:'Kelompokkan sikap berikut: etis atau tidak etis?',b:['Etis','Tidak etis'],i:[['Memeriksa ulang jawaban AI sebelum dipakai',0],['Membuat video palsu wajah teman tanpa izin',1],['Menulis keterangan: gambar ini dibuat oleh AI',0],['Memasukkan data pribadi teman ke chatbot sembarangan',1],['Menyalin jawaban AI mentah tanpa dibaca',1],['Melaporkan konten deepfake',0]],e:'AI adalah alat bantu. Kita tetap bertanggung jawab atas hasilnya, wajib menjaga privasi, dan jujur menyebut penggunaan AI.'},
+{k:'choice',n:'Cari bug',q:'Program ini error saat dijalankan. Apa penyebabnya?',c:'jumlah = 5\nprint(jumlah + "3")',o:['Variabel belum dibuat','Angka dijumlahkan dengan teks (tipe data berbeda)','Kurang perulangan','Python tidak bisa print'],a:1,e:'5 bertipe angka, "3" bertipe teks. Ubah dengan int("3") agar bisa dijumlahkan.'},
+{k:'choice',n:'Level akhir: prompt',q:'Mana prompt terbaik agar AI membantumu <b>belajar</b> perulangan?',o:['Kerjakan semua tugasku','Jawab','Jelaskan perulangan for dengan contoh sederhana, lalu beri 2 latihan untuk siswa SMK','Buatkan program apa saja'],a:2,e:'Prompt yang baik jelas tujuannya, memberi konteks, dan meminta penjelasan. Dengan begitu AI membantumu belajar, bukan menggantikanmu.'}
+];
+const Z=i=>i<5?'Zona 1 · Logika Koding':i<9?'Zona 2 · Dunia AI':'Zona 3 · Etika dan Tantangan';
+let cur=0,hearts=3,wrong=0,fin=false,un=0,R=[],mute=false,AC;
+function sfx(t){if(mute)return;try{AC=AC||new AudioContext();const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime,f={ok:[660,880],bad:[220,160],win:[523,1047],tap:[440,440]}[t];o.connect(g);g.connect(AC.destination);o.frequency.setValueAtTime(f[0],n);o.frequency.setValueAtTime(f[1],n+.1);g.gain.setValueAtTime(.08,n);g.gain.exponentialRampToValueAtTime(.001,n+.28);o.start();o.stop(n+.28)}catch(e){}}
+function fit(){$('#stage').style.transform=`translate(-50%,-50%) scale(${Math.min(innerWidth/1280,innerHeight/720)})`}
+addEventListener('resize',fit);fit();
+const total=()=>R.reduce((s,r)=>s+(r?r.p:0),0),cnt=()=>R.filter(Boolean).length;
+function go(n){document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id==n));if(n=='map')map()}
+function map(){$('#ms').textContent=`Selesai ${cnt()} dari ${L.length} · ⭐ ${total()} poin`;
+$('#mp').innerHTML=L.map((l,i)=>{const lk=i>un,r=R[i];return `<button class="node z${i<5?1:i<9?2:3} ${lk?'lk':''} ${r?'dn':''}" ${lk?'disabled':''} onclick="play(${i})"><span class="num">${lk?'🔒':i+1}</span><span>${l.n}</span><span class="st">${r?'★'.repeat(r.s)+'☆'.repeat(3-r.s):''}</span></button>`}).join('')}
+function hud(){$('#hud').innerHTML=`<button class="sm" onclick="go('map')">☰ Peta</button><span class="zn">${Z(cur)}</span><b>Level ${cur+1} dari ${L.length}</b><span>${'❤️'.repeat(hearts)}${'🖤'.repeat(3-hearts)}</span><span class="chip">⭐ ${total()}</span>`;$('#pbi').style.width=cnt()/L.length*100+'%'}
+function fb(ok,m){const f=$('#fb');f.className=ok?'ok':'bad';f.innerHTML=(ok?'✅ ':'❌ ')+m}
+function lose(){hearts--;wrong++;sfx('bad');hud();if(hearts<=0){fin=true;$('#ovt').innerHTML='Jangan menyerah! Petunjuk: '+L[cur].e;$('#ov').style.display='flex'}}
+function win(){if(fin)return;fin=true;const p=Math.max(40,100-wrong*20),s=wrong==0?3:wrong<3?2:1;if(!R[cur]||p>R[cur].p)R[cur]={p,s};un=Math.max(un,cur+1);sfx('win');hud();fb(1,`<b>Level selesai! +${p} poin ${'★'.repeat(s)}</b><br>${L[cur].e}`);const n=$('#nx');n.style.display='';n.textContent=cur==L.length-1?'Lihat Hasil ▶':'Level Berikutnya ▶'}
+function play(i){cur=i;hearts=3;wrong=0;fin=false;go('play');$('#ov').style.display='none';$('#nx').style.display='none';$('#fb').className='';$('#fb').innerHTML='';hud();const l=L[i];
+$('#body').innerHTML=`<h2>${l.n}</h2><p class="q">${l.q}</p>${l.c?`<pre>${l.c}</pre>`:''}<div id="area"></div>`;({choice:mChoice,order:mOrder,match:mMatch,cls:mCls})[l.k](l,$('#area'))}
+function mChoice(l,A){A.innerHTML='<div class="g2">'+l.o.map((t,i)=>`<button class="opt" data-i="${i}">${t}</button>`).join('')+'</div>';
+A.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(fin||b.disabled)return;if(+b.dataset.i==l.a){b.classList.add('ok');win()}else{b.classList.add('bad');b.disabled=true;lose();fb(0,'Belum tepat. Coba pilihan lain!')}})}
+function mOrder(l,A){let pool=shuf(l.i.map((_,i)=>i)),ans=[];
+const r=()=>{A.innerHTML=`<div class="ord"><div><div class="lab">Urutanmu (klik langkah untuk melepas)</div><ol class="slots">${l.i.map((_,s)=>`<li data-s="${s}" class="${ans[s]!==undefined?'f':''}">${ans[s]!==undefined?l.i[ans[s]]:'...'}</li>`).join('')}</ol></div><div><div class="lab">Pilihan langkah</div><div class="pool">${pool.map(i=>`<button class="opt" data-p="${i}" style="min-height:48px;padding:8px 16px;font-size:20px">${l.i[i]}</button>`).join('')}</div><button class="go" id="ck" style="margin-top:12px;font-size:22px" ${ans.length<l.i.length?'disabled':''}>Periksa Urutan</button></div></div>`;
+if(fin)return;A.querySelectorAll('[data-p]').forEach(x=>x.onclick=()=>{const i=+x.dataset.p;pool=pool.filter(v=>v!=i);ans.push(i);sfx('tap');r()});
+A.querySelectorAll('li.f').forEach(x=>x.onclick=()=>{if(fin)return;const s=+x.dataset.s;pool.push(ans[s]);ans.splice(s,1);r()});
+$('#ck').onclick=()=>{if(fin)return;if(ans.every((v,s)=>v==s)){win();r();A.querySelectorAll('li').forEach(x=>x.classList.add('ok'));A.querySelectorAll('button').forEach(x=>x.disabled=true)}else{const n=ans.filter((v,s)=>v==s).length;lose();fb(0,`Baru ${n} dari ${l.i.length} langkah berada di posisi benar. Susun ulang!`);ans=[];pool=shuf(l.i.map((_,i)=>i));if(!fin)r()}}};r()}
+function mMatch(l,A){const Rr=shuf(l.p.map((_,i)=>i));let sel=-1,got=0;
+A.innerHTML=`<div class="mt"><div>${l.p.map((p,i)=>`<button class="opt" data-l="${i}">${p[0]}</button>`).join('')}</div><div>${Rr.map(i=>`<button class="opt" data-r="${i}">${l.p[i][1]}</button>`).join('')}</div></div>`;
+const Ls=A.querySelectorAll('[data-l]'),Rs=A.querySelectorAll('[data-r]');
+Ls.forEach(x=>x.onclick=()=>{if(fin||x.classList.contains('ok'))return;Ls.forEach(y=>y.classList.remove('sel'));x.classList.add('sel');sel=+x.dataset.l;sfx('tap')});
+Rs.forEach(x=>x.onclick=()=>{if(fin||x.classList.contains('ok'))return;if(sel<0){fb(0,'Pilih istilah di kolom kiri dulu, ya.');return}
+if(+x.dataset.r==sel){x.classList.add('ok');Ls[sel].classList.remove('sel');Ls[sel].classList.add('ok');sel=-1;sfx('ok');if(++got==l.p.length)win();else fb(1,'Pasangan tepat!')}
+else{x.classList.add('bad');setTimeout(()=>x.classList.remove('bad'),500);lose();fb(0,'Belum cocok. Coba pasangan lain!')}})}
+function mCls(l,A){let n=0;const it=shuf(l.i);
+const r=()=>{A.innerHTML=`<div class="lab">Kartu ${n+1} dari ${it.length}</div><div class="card2">${it[n][0]}</div><div class="bins">${l.b.map((t,i)=>`<button class="opt bin" data-b="${i}">${t}</button>`).join('')}</div>`;
+A.querySelectorAll('[data-b]').forEach(x=>x.onclick=()=>{if(fin)return;if(+x.dataset.b==it[n][1]){sfx('ok');if(++n==it.length){win()}else{fb(1,'Benar!');r()}}else{lose();fb(0,'Belum tepat. Pikirkan lagi!')}})};r()}
+function result(){const t=total(),pc=Math.round(t/(L.length*100)*100),rk=pc>=90?'Teknisi Digital Master 🏆':pc>=70?'Teknisi Digital Andal 🥈':pc>=40?'Teknisi Digital Pemula 🥉':'Calon Teknisi Digital 🌱';
+$('#result').innerHTML=`<h2>Evaluasi Akhir</h2><div class="row" style="gap:30px;align-items:flex-start"><div style="flex:1"><div class="cd"><b>${rk}</b><p style="font-size:30px">Skor: <span class="gold">${t}</span> dari ${L.length*100} (${pc}%)</p><p>Level selesai: ${cnt()} dari ${L.length}. ${cnt()<L.length?'Selesaikan semua level untuk skor penuh.':'Hebat, semua level tuntas!'}</p></div><div class="cd" style="margin-top:14px"><b>Refleksi</b><p style="margin-bottom:8px">Sebutkan satu manfaat AI dan satu risikonya di bidang keahlianmu.</p><textarea aria-label="Jawaban refleksi"></textarea></div></div><div style="flex:1;max-height:470px;overflow:auto"><table>${L.map((l,i)=>`<tr><td>${i+1}. ${l.n}</td><td class="gold">${R[i]?'★'.repeat(R[i].s)+'☆'.repeat(3-R[i].s):'belum'}</td><td>${R[i]?R[i].p:0}</td></tr>`).join('')}</table></div></div><div class="row" style="margin-top:auto"><button class="sm" onclick="go('map')">◀ Peta Level</button><button class="sm" onclick="R=[];un=0;go('home')">Main dari awal</button><span style="flex:1"></span><button class="go" onclick="go('credit')">Informasi Kreator ▶</button></div>`;go('result')}
+</script></body></html>
